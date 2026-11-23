@@ -14,40 +14,82 @@ Run all four [automated cases](../tests/) in Chrome and Firefox. Each test start
 
 ## Test cases
 
-Start each case from the [demo URL](../resources/data/environment.json) in a fresh session. Use the [demo accounts](../resources/data/users.json) and [checkout data](../resources/data/checkout.json).
+Each case pairs a test step with its expected result and lists the state required before Step 1. Use a fresh browser session to open the [demo URL](../resources/data/environment.json). The [demo accounts](../resources/data/users.json) and [checkout data](../resources/data/checkout.json) provide the case inputs. [TestRail Test Case (Steps) format](https://support.testrail.com/hc/en-us/articles/14927678348052-Test-case-templates)
 
 ### Shared checkout setup for SD-01 and SD-02
 
-1. Sign in with the standard demo account. Expect the `Products` screen.
-2. Add the product from the checkout data and open the cart. Expect `Your Cart` to show the selected product.
-3. Click `Checkout`. Expect `Checkout: Your Information`.
+The [checkout spec](../tests/checkout.spec.ts) runs this setup before each checkout case.
+
+| #   | Step                                         | Expected Result                     |
+| --- | -------------------------------------------- | ----------------------------------- |
+| 1   | Sign in with the standard demo account.      | The `Products` screen opens.        |
+| 2   | Add `Sauce Labs Backpack` and open the cart. | `Your Cart` shows the backpack.     |
+| 3   | Click `Checkout`.                            | `Checkout: Your Information` opens. |
 
 ### SD-01 | Place a one-item order
 
-**High priority · Positive · Automated**
+**High priority · Positive · Automated** · [Playwright spec](../tests/checkout.spec.ts)
 
-1. Enter the first name, last name and postal code from the checkout data. Click `Continue`. Expect `Checkout: Overview`.
-2. Verify that the overview shows the selected product and the expected item subtotal from the checkout data.
-3. Click `Finish`. Expect `Checkout: Complete!` and `Thank you for your order!`.
+#### Preconditions
+
+- An active internet connection is available.
+- Open SauceDemo in a fresh Google Chrome session and complete the [shared checkout setup](#shared-checkout-setup-for-sd-01-and-sd-02).
+- The checkout information form is open, and the cart contains only `Sauce Labs Backpack`.
+
+#### Steps and expected results
+
+| #   | Step                                                                                                       | Expected Result                                                             |
+| --- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 1   | Enter `Ada`, `Tester`, and `12345` in the first name, last name, and postal code fields. Click `Continue`. | `Checkout: Overview` opens.                                                 |
+| 2   | Review the selected item and subtotal.                                                                     | The overview lists `Sauce Labs Backpack` and displays `Item total: $29.99`. |
+| 3   | Click `Finish`.                                                                                            | `Checkout: Complete!` shows `Thank you for your order!`.                    |
 
 ### SD-02 | Require a postal code at checkout
 
-**High priority · Negative and empty-field boundary · Automated**
+**High priority · Negative and empty-field boundary · Automated** · [Playwright spec](../tests/checkout.spec.ts)
 
-1. Enter the first and last name from the checkout data, leave the postal code empty and click `Continue`.
-2. Expect `Error: Postal Code is required` and the `Checkout: Your Information` screen to remain visible.
-3. Enter the valid postal code from the checkout data and click `Continue`. Expect `Checkout: Overview`.
+#### Preconditions
+
+- An active internet connection is available.
+- Open SauceDemo in a fresh Google Chrome session and complete the [shared checkout setup](#shared-checkout-setup-for-sd-01-and-sd-02).
+- `Checkout: Your Information` is open and the postal code field is empty.
+
+#### Steps and expected results
+
+| #   | Step                                                                         | Expected Result                                                                           |
+| --- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| 1   | Enter `Ada` and `Tester`, leave the postal code empty, and click `Continue`. | The app stays on `Checkout: Your Information` and shows `Error: Postal Code is required`. |
+| 2   | Enter `12345` as the postal code and click `Continue`.                       | `Checkout: Overview` opens.                                                               |
 
 ### SD-03 | Reject a locked demo account
 
-**High priority · Negative · Automated**
+**High priority · Negative · Automated** · [Playwright spec](../tests/login.spec.ts)
 
-1. Enter the locked demo account credentials and click `Login`.
-2. Expect the login form to remain visible with the error `Epic sadface: Sorry, this user has been locked out.`.
+#### Preconditions
+
+- An active internet connection is available.
+- Open the SauceDemo login page in a fresh Google Chrome session.
+- The `locked_out_user` account is available in the [demo accounts](../resources/data/users.json).
+
+#### Steps and expected results
+
+| #   | Step                                                         | Expected Result                                                                                |
+| --- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| 1   | Enter the locked demo account credentials and click `Login`. | The login form remains visible and shows `Epic sadface: Sorry, this user has been locked out.` |
 
 ### SD-04 | Remove the last cart item
 
-**Medium priority · Boundary · Automated**
+**Medium priority · Boundary · Automated** · [Playwright spec](../tests/cart.spec.ts)
 
-1. Sign in as the standard user, add the product from the checkout data and open the cart. Expect `Your Cart` to show one row for the product and a badge count of `1`.
-2. Click `Remove` for the product. Expect `Your Cart` to remain visible with zero cart rows and no cart badge.
+#### Preconditions
+
+- An active internet connection is available.
+- Open the SauceDemo login page in a fresh Google Chrome session with an empty cart.
+- The standard demo account and `Sauce Labs Backpack` are available for this case.
+
+#### Steps and expected results
+
+| #   | Step                                                                                  | Expected Result                                                           |
+| --- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 1   | Sign in with the standard demo account, add `Sauce Labs Backpack`, and open the cart. | `Your Cart` shows one row for the backpack and a badge count of `1`.      |
+| 2   | Click `Remove` for the backpack.                                                      | `Your Cart` stays open with zero product rows. The cart badge disappears. |
