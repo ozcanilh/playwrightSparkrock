@@ -12,4 +12,4 @@ The workflow uses a Slack Incoming Webhook to publish test results and report do
 
 Run **Actions → Playwright E2E → Run workflow** after enabling delivery. **Notify Slack** sends one message after the browser jobs finish. The message includes the result, trigger, browsers, workflow run link and available report bundle links. A bundle contains `playwright-report/` and `allure-report/`. The scheduled run publishes a Chrome bundle.
 
-The GitHub Actions artifacts are retained for 14 days. Download them from the Slack links using an account with access to the repository. Check the **Notify Slack** job log for delivery errors or a missing webhook value. [Workflow](../.github/workflows/playwright.yml)
+The GitHub Actions artifacts are retained for 14 days. Download them from the Slack links using an account with access to the repository. Check the **Notify Slack** job log for delivery errors or a missing webhook value. [Workflow](../.github/workflows/playwright.yml) · [Node.js delivery script](../scripts/send-slack-message.mjs)

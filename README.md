@@ -135,7 +135,7 @@ Typed fixtures provide independent browser state per test. Web-first assertions,
 
 ## Slack notifications
 
-Slack delivery is disabled by default. When enabled, the workflow posts one report summary to the selected channel after a push to `main`, a manual run or the daily Chrome run. Each link opens a browser-specific bundle with both HTML reports. [Slack setup](docs/slack-setup.md)
+Slack delivery is disabled by default. When enabled, the workflow calls the Node.js script after a push to `main`, a manual run or the daily Chrome run. The script posts one summary with links to the browser-specific bundles containing both HTML reports. [Slack script](scripts/send-slack-message.mjs) · [Slack setup](docs/slack-setup.md)
 
 ## Agent setup
 
