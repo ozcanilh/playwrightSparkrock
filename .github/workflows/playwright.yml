@@ -1,0 +1,52 @@
+name: Playwright E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: '0'
+
+jobs:
+  test:
+    name: E2E (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox]
+    env:
+      BROWSER: ${{ matrix.browser }}
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps "$BROWSER"
+      - run: npm test -- --project="$BROWSER"
+
+      - name: Generate Allure HTML
+        if: ${{ !cancelled() && hashFiles('allure-results/*-result.json') != '' }}
+        run: npm run report:allure:generate
+
+      - name: Upload HTML reports
+        if: ${{ !cancelled() && hashFiles('playwright-report/index.html') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports-${{ matrix.browser }}
+          path: |
+            playwright-report/
+            allure-report/
+          retention-days: 14

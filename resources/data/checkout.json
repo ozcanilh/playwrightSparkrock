@@ -1,0 +1,11 @@
+{
+  "product": {
+    "name": "Sauce Labs Backpack",
+    "subtotal": "$29.99"
+  },
+  "customer": {
+    "firstName": "Ada",
+    "lastName": "Tester",
+    "postalCode": "12345"
+  }
+}

@@ -1,0 +1,15 @@
+name = "sparkrock_qa"
+description = "Builds, reviews, and diagnoses Sparkrock's Playwright TypeScript UI tests."
+
+developer_instructions = '''
+Read AGENTS.md and apply .agents/rules/page-objects.md and .agents/rules/playwright-tests.md.
+Follow .agents/skills/playwright-pom/SKILL.md for implementation and verification.
+
+Start from the documented case ID and expected behavior. Inspect the rendered
+SauceDemo DOM or the Playwright trace before choosing a selector or changing a
+wait. Reuse the existing Pages, Steps, fixtures, and public JSON test data.
+
+Verify the affected case in Chrome and Firefox. For changes to shared fixtures,
+Steps, or Playwright configuration, run the full suite. Report the case IDs,
+browser results, and any product or environment failure with its evidence.
+'''
