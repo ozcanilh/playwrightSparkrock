@@ -77,11 +77,12 @@ Each case checks an outcome a shopper would notice. An order review must show th
 
 #### Innovation and Efficiency
 
-- **GitHub Actions integration.** The workflow installs locked dependencies, checks formatting and TypeScript, runs the browser tests and packages the reports. Pushes to `main` and pull requests trigger the same checks, and a manual trigger lets reviewers run the suite on demand. Chrome and Firefox use separate matrix jobs, so a failure in one browser still leaves results from the other. [CI workflow](.github/workflows/playwright.yml)
+- **GitHub Actions integration.** The workflow checks formatting and TypeScript, runs the browser tests and packages both reports on pushes to `main`, pull requests and manual runs. A daily Chrome run at 09:00 Istanbul time checks the hosted storefront between code changes. [CI workflow](.github/workflows/playwright.yml)
 - **Parallel execution.** Playwright uses two workers and gives each test a fresh browser context. Tests can reuse the public demo accounts while keeping session and cart state isolated. The same spec runs in both browsers, giving cross-browser coverage from a single implementation. [Playwright configuration](playwright.config.ts) · [Test strategy](docs/test-design.md#strategy)
 - **Reusable POM and data.** Page Objects keep selectors and UI actions in one place. Shopping and Checkout Steps share repeated workflows across cases. Typed fixtures construct these objects for each test, and JSON resources provide consistent inputs. A selector change can be made in the Page Object that owns it. [Page Objects](pages/) · [Steps](steps/) · [Fixtures](fixtures/pomFixtures.ts) · [Test data](resources/data/)
 - **Early formatting feedback.** Husky invokes lint-staged to run Prettier on staged files. This keeps the pre-commit check focused on the files being committed. CI checks formatting across the project and runs TypeScript validation before opening a browser. [Pre-commit hook](.husky/pre-commit) · [npm configuration](package.json) · [CI workflow](.github/workflows/playwright.yml)
 - **Two reports from one run.** Playwright HTML gives reviewers named steps, failed assertions and trace links. Allure provides a result summary with step details and attachments. The workflow packages both HTML reports per browser when available, and failure screenshots and traces help diagnose issues from the recorded run. [Report commands](#reports-and-failure-diagnosis) · [Report artifacts](.github/workflows/playwright.yml)
+- **Slack report delivery.** Once enabled, a single channel message gives the team the result, browsers, and direct download links for the Playwright and Allure report bundles. The message links to the exact workflow run for failure diagnosis. [Slack setup](docs/slack-setup.md)
 - **Consistent test maintenance.** The project QA agent, POM skill and selector and wait rules give contributors a repeatable process for implementing a documented case, diagnosing failures and verifying changes in both browsers. [Agent setup](#agent-setup)
 
 ### Test Case Writing
@@ -126,11 +127,15 @@ Typed fixtures provide independent browser state per test. Web-first assertions,
 
 ## GitHub Actions CI
 
-**GitHub Actions** runs formatting, type and browser checks in a clean environment for pushes to `main`, pull requests and manual runs. The browser matrix gives Chrome and Firefox separate jobs that can complete independently. Each job uses two Playwright workers. A failed test gets one retry, and the run flags flaky results as failures. [Workflow file](.github/workflows/playwright.yml)
+**GitHub Actions** runs formatting, type and browser checks in a clean environment. Pushes to `main`, pull requests and manual runs use separate Chrome and Firefox matrix jobs. The daily schedule runs all four cases in Chrome at **09:00 Europe/Istanbul** from the default branch. Each browser job uses two Playwright workers. A failed test gets one retry, and the run flags flaky results as failures. [Workflow file](.github/workflows/playwright.yml) · [GitHub schedule syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule)
 
 1. Open **Actions → Playwright E2E** in the GitHub repository. Use **Run workflow** for a manual run once the workflow is available on the default branch. [GitHub's manual workflow guide](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow)
 2. Open a run to view each browser's result. Download `reports-chrome` or `reports-firefox` under **Artifacts** for the generated Playwright and Allure HTML reports. The workflow uploads them when available and retains them for 14 days.
 3. Extract the archive. Serve the reports with `npx playwright show-report path/to/playwright-report` and `npx allure open path/to/allure-report`.
+
+## Slack notifications
+
+Slack delivery is disabled by default. When enabled, the workflow posts one report summary to the selected channel after a push to `main`, a manual run or the daily Chrome run. Each link opens a browser-specific bundle with both HTML reports. [Slack setup](docs/slack-setup.md)
 
 ## Agent setup
 
